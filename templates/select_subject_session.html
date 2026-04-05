@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Subject & Session - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename = '/css/bootstrap.min.css')}}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #5C4033 0%, #3E2723 100%), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><defs><pattern id="lines" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="100" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="1"/><line x1="100" y1="0" x2="0" y2="100" stroke="rgba(255,255,255,0.04)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23lines)"/></svg>');
+            background-size: cover, auto;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .selection-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header-section h1 {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .header-section p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+            background: white;
+        }
+        .btn-proceed {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-proceed::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-proceed:hover::before {
+            left: 100%;
+        }
+        .btn-proceed:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn-nav {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="selection-container">
+            <div class="header-section">
+                <h1>
+                    {% if is_student %}
+                    <i class="fas fa-play-circle me-2"></i>Select Exam Session
+                    {% else %}
+                    <i class="fas fa-clipboard-list me-2"></i>Select Subject & Session
+                    {% endif %}
+                </h1>
+                <p>
+                    {% if is_student %}
+                    Choose the session year for your exam
+                    {% else %}
+                    Choose the subject and session for which you want to add questions
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('select_subject_session') }}">
+                <!-- Student Name & Class - Only for Students -->
+                {% if is_student %}
+                <div class="row-fields" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="studentName" class="form-label">
+                            <i class="fas fa-user"></i>Full Name
+                        </label>
+                        <input type="text" class="form-control" id="studentName" name="student_name" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="studentClass" class="form-label">
+                            <i class="fas fa-graduation-cap"></i>Class
+                        </label>
+                        <input type="text" class="form-control" id="studentClass" name="student_class" placeholder="Enter your class">
+                    </div>
+                </div>
+                <hr style="margin: 2rem 0; opacity: 0.2;">
+                {% endif %}
+                <!-- Subject Selection -->
+                <div class="form-group">
+                    <label for="subject" class="form-label">
+                        <i class="fas fa-book"></i>Subject
+                    </label>
+                    {% if is_student and selected_subject_id %}
+                    <input type="hidden" name="subject" id="subject" value="{{ selected_subject_id }}">
+                    <div style="padding: 0.75rem; background: #f0f7ff; border: 2px solid #667eea; border-radius: 12px; color: #667eea; font-weight: 600;">
+                        <i class="fas fa-check-circle me-2"></i>
+                        {% for subj in all_subjects %}
+                            {% if subj.subject_id == selected_subject_id|int %}
+                                {{ subj.subject_name }}
+                            {% endif %}
+                        {% endfor %}
+                        <span style="color: #999; font-size: 0.85rem;"> (selected)</span>
+                    </div>
+                    {% else %}
+                    <select class="form-select" id="subject" name="subject" required>
+                        <option value="">Select a subject...</option>
+                        {% for subj in all_subjects %}
+                        <option value="{{ subj.subject_id }}" {% if selected_subject_id and subj.subject_id == selected_subject_id|int %}selected{% endif %} data-name="{{ subj.subject_name }}">{{ subj.subject_name }}</option>
+                        {% endfor %}
+                    </select>
+                    {% endif %}
+                </div>
+
+                <!-- Topic Field - Hidden for Students -->
+                {% if not is_student %}
+                <div class="form-group">
+                    <label for="topic" class="form-label">
+                        <i class="fas fa-tag"></i>Topic <span style="color: #999; font-size: 0.9rem;">(Optional)</span>
+                    </label>
+                    <input type="text" class="form-control" id="topic" name="topic_name" placeholder="Enter topic name (e.g., Algebra, Photosynthesis)">
+                    <small style="color: #999; display: block; margin-top: 0.5rem;">Leave blank to create questions for the entire subject</small>
+                </div>
+                {% endif %}
+
+                <!-- Session Selection -->
+                <div class="form-group">
+                    <label for="session" class="form-label">
+                        <i class="fas fa-calendar-alt"></i>
+                        {% if is_student %}
+                        Exam Session Year
+                        {% else %}
+                        Session Year
+                        {% endif %}
+                    </label>
+                    {% if is_student and available_sessions %}
+                    <select class="form-select" id="session" name="session" required>
+                        <option value="">Select a session...</option>
+                        {% for session in available_sessions %}
+                        <option value="{{ session.session_id }}">{{ session.exam_session }}</option>
+                        {% endfor %}
+                    </select>
+                    <small style="color: #999; display: block; margin-top: 0.5rem;">Select from available exam sessions</small>
+                    {% elif is_student and not available_sessions %}
+                    <div style="padding: 1rem; background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; color: #856404;">
+                        <i class="fas fa-info-circle me-2"></i>No exam sessions available for this subject yet.
+                    </div>
+                    <input type="hidden" name="session" value="">
+                    {% else %}
+                    <input type="text" class="form-control" id="session" name="session"
+                           placeholder="e.g., 2023/2024" required>
+                    {% endif %}
+                </div>
+
+                <!-- Hidden field to track if this is a student submission -->
+                {% if is_student %}
+                <input type="hidden" name="is_student" value="true">
+                {% endif %}
+
+                <button type="submit" class="btn btn-proceed">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    {% if is_student %}
+                    Start Exam
+                    {% else %}
+                    Proceed to Add Questions
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+
+        <div class="nav-buttons">
+            {% if is_student %}
+            <a href="{{ url_for('home') }}" class="btn-nav">
+                <i class="fas fa-arrow-left me-1"></i>Back to Exams
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-nav">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('dashboard') }}" class="btn-nav">
+                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+            </a>
+            <a href="{{ url_for('questions') }}" class="btn-nav">
+                <i class="fas fa-list me-1"></i>View All Questions
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn-nav">
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // For student flow, fetch available sessions when subject changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const isStudent = document.querySelector('input[name="is_student"]')?.value === 'true' || false;
+            const subjectSelect = document.getElementById('subject');
+            const sessionSelect = document.getElementById('session');
+            
+            // If this is student flow and subject is dynamically selected, fetch sessions
+            if (isStudent && subjectSelect && sessionSelect && !subjectSelect.disabled) {
+                subjectSelect.addEventListener('change', function() {
+                    const subjectId = this.value;
+                    if (!subjectId) {
+                        sessionSelect.innerHTML = '<option value="">Select a session...</option>';
+                        return;
+                    }
+                    
+                    // Fetch available sessions for this subject
+                    fetch(`/api/sessions/${subjectId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            sessionSelect.innerHTML = '<option value="">Select a session...</option>';
+                            if (data.sessions && data.sessions.length > 0) {
+                                data.sessions.forEach(session => {
+                                    const option = document.createElement('option');
+                                    option.value = session.session_id;
+                                    option.textContent = session.exam_session;
+                                    sessionSelect.appendChild(option);
+                                });
+                            } else {
+                                const option = document.createElement('option');
+                                option.value = '';
+                                option.textContent = 'No sessions available for this subject';
+                                sessionSelect.appendChild(option);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching sessions:', error);
+                            sessionSelect.innerHTML = '<option value="">Error loading sessions</option>';
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html>

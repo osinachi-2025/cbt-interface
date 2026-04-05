@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Exam - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 32px 80px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            display: none;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* Header */
+        .exam-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .exam-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .exam-title i {
+            color: #667eea;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .stat-value {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .timer-stat {
+            background: var(--warning-gradient);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .progress-percentage {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .question-number {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: none;
+            color: #667eea;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .flag-btn.flagged {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1.6;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-item:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .option-item:hover::before {
+            left: 100%;
+        }
+
+        .option-item.selected {
+            background: var(--primary-gradient);
+            border-color: #667eea;
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option-item.selected .option-letter {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .option-text {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* Navigation */
+        .navigation-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-height: 48px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .nav-btn.secondary:hover:not(:disabled) {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-heavy);
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .modal-title i {
+            color: #667eea;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+        }
+
+        .result-icon.success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .result-icon.warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .result-details {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            background: var(--success-gradient);
+            border: none;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Animations */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .exam-header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-stats {
+                justify-content: center;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option-item {
+                padding: 1rem;
+                min-height: 48px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .result-score {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exam-title {
+                font-size: 1.25rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .option-text {
+                font-size: 0.95rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+
+            .form-input {
+                font-size: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .option-item:focus,
+        .nav-btn:focus,
+        .action-btn:focus,
+        .modal-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        @media (prefers-contrast: high) {
+            :root {
+                --glass-bg: white;
+                --glass-border: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Preparing your exam</div>
+                <div class="loading-subtitle">Loading questions...</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content">
+            <!-- Exam Header -->
+            <header class="exam-header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="exam-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            Full Exam
+                        </h1>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                            <span id="headerStudentName"></span> • <span id="headerSessionName"></span>
+                        </div>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span>Question</span>
+                            <span class="stat-value" id="currentQuestion">1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Time</span>
+                            <span class="stat-value timer-stat" id="timer">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Progress Bar -->
+            <section class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-label">Exam Progress</span>
+                    <span class="progress-percentage" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </section>
+
+            <!-- Question Card -->
+            <section class="question-card" id="questionCard">
+                <div class="question-header">
+                    <div class="question-number" id="questionNumber">Question 1</div>
+                    <div class="question-actions">
+                        <button class="action-btn flag-btn" id="flagBtn">
+                            <i class="fas fa-flag"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+                <div id="questionImageContainer" style="margin: 1rem 0; text-align: center;">
+                    <!-- Question image will be populated here -->
+                </div>
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Options will be populated here -->
+                </div>
+            </section>
+
+            <!-- Navigation -->
+            <section class="navigation-section">
+                <div class="nav-buttons">
+                    <button class="nav-btn secondary" id="prevBtn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <button class="nav-btn" id="nextBtn">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <button class="nav-btn" id="submitBtn" style="display:none;">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Results Modal -->
+    <div id="resultModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="result-header">
+                <div class="result-icon success" id="resultIcon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="result-score" id="finalScore">0%</div>
+                <div class="result-subtitle" id="resultMessage">Exam completed successfully!</div>
+            </div>
+            <div class="result-details">
+                <div class="result-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="correctAnswers">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalQuestions">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="timeTaken">00:00</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" id="finishBtn">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Template data from Flask
+        const loggedInStudentName = {{ student_name|tojson }};
+        const urlSubjectId = {{ subject_id|tojson }};
+        const urlSubjectName = {{ subject_name|tojson }};
+        const urlSession = {{ session|tojson }};
+
+        // Global variables
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let studentName = loggedInStudentName || 'Student';
+        let selectedSession = urlSession;
+        let selectedSubject = urlSubjectId;
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainContent = document.getElementById('mainContent');
+        const resultModal = document.getElementById('resultModal');
+        const questionCard = document.getElementById('questionCard');
+        const questionText = document.getElementById('questionText');
+        const optionsGrid = document.getElementById('optionsGrid');
+        const currentQuestionDisplay = document.getElementById('currentQuestion');
+        const questionNumber = document.getElementById('questionNumber');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const timerDisplay = document.getElementById('timer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const flagBtn = document.getElementById('flagBtn');
+        const finishBtn = document.getElementById('finishBtn');
+
+        // Initialize - auto-load exam questions
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[DEBUG] Page loaded - Auto-loading exam');
+            console.log('[DEBUG] Student:', studentName);
+            console.log('[DEBUG] Subject ID:', urlSubjectId);
+            console.log('[DEBUG] Session:', urlSession);
+            
+            // Populate header with student info
+            document.getElementById('headerStudentName').textContent = studentName;
+            document.getElementById('headerSessionName').textContent = urlSession || 'Session';
+            
+            // Auto-load questions
+            loadQuestions(urlSubjectId, urlSession);
+        });
+
+        // Load questions
+        async function loadQuestions(subjectId, sessionId) {
+            try {
+                console.log('=== Loading Full Exam Questions ===');
+                console.log('Subject Name:', urlSubjectName);
+                console.log('Session ID:', sessionId);
+
+                // Build URL using subject name (not ID)
+                let url = `/api/get-questions?subject=${encodeURIComponent(urlSubjectName)}`;
+                if (sessionId && sessionId.trim()) {
+                    url += `&session=${encodeURIComponent(sessionId)}`;
+                }
+                console.log('Fetch URL:', url);
+
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 20000);
+
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeout);
+
+                const data = await response.json();
+                console.log('API Response Status:', response.status);
+
+                if (!response.ok) {
+                    const errorMsg = data.error || `Server error: ${response.status}`;
+                    console.error('API Error:', errorMsg);
+                    throw new Error(errorMsg);
+                }
+
+                questions = data.questions || [];
+                console.log('Total Questions Loaded:', questions.length);
+
+                if (questions.length === 0) {
+                    alert('No questions found for this subject and session.');
+                    window.location.href = '/';
+                    return;
+                }
+
+                answers = new Array(questions.length).fill(null);
+
+                // Show exam interface
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+
+                // Start timer and display first question
+                startTimer();
+                displayQuestion(0);
+                updateProgress();
+                console.log('=== Exam Loaded Successfully ===');
+            } catch (error) {
+                console.error('Error loading questions:', error);
+                loadingScreen.style.display = 'none';
+                
+                let errorMsg = 'Failed to load questions. ';
+                if (error.name === 'AbortError') {
+                    errorMsg += 'Loading timed out.';
+                } else {
+                    errorMsg += error.message;
+                }
+
+                alert(errorMsg);
+                window.location.href = '/';
+            }
+        }
+
+        // Display question
+        function displayQuestion(index) {
+            currentQuestionIndex = index;
+            const question = questions[index];
+
+            if (!question) return;
+
+            questionNumber.textContent = `Question ${index + 1}`;
+            currentQuestionDisplay.textContent = index + 1;
+            questionText.textContent = question.question_text;
+
+            // Handle question image
+            const imageContainer = document.getElementById('questionImageContainer');
+            if (question.question_image) {
+                imageContainer.innerHTML = `<img src="/static/${question.question_image}" alt="Question image" style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">`;
+            } else {
+                imageContainer.innerHTML = '';
+            }
+
+            // Clear and populate options
+            optionsGrid.innerHTML = '';
+            
+            // Handle different question types
+            let optionsArray;
+            if (question.question_type === 'true_false') {
+                optionsArray = [
+                    { letter: 'T', text: 'True' },
+                    { letter: 'F', text: 'False' }
+                ];
+            } else {
+                optionsArray = [
+                    { letter: 'A', text: question.option_a },
+                    { letter: 'B', text: question.option_b },
+                    { letter: 'C', text: question.option_c },
+                    { letter: 'D', text: question.option_d }
+                ];
+            }
+
+            optionsArray.forEach((option, optionIndex) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option-item';
+                optionElement.dataset.index = optionIndex;
+
+                optionElement.innerHTML = `
+                    <div class="option-letter">${option.letter}</div>
+                    <div class="option-text">${option.text}</div>
+                `;
+
+                optionElement.addEventListener('click', () => selectOption(optionIndex));
+
+                if (answers[index] === optionIndex) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionsGrid.appendChild(optionElement);
+            });
+
+            updateNavigationButtons();
+        }
+
+        // Select option
+        function selectOption(optionIndex) {
+            answers[currentQuestionIndex] = optionIndex;
+
+            const options = optionsGrid.querySelectorAll('.option-item');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+
+            setTimeout(() => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    displayQuestion(currentQuestionIndex + 1);
+                    updateProgress();
+                }
+            }, 500);
+        }
+
+        // Update navigation buttons
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-flex';
+            } else {
+                nextBtn.style.display = '';
+                submitBtn.style.display = 'none';
+            }
+
+            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
+        }
+
+        // Navigation handlers
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1);
+                updateProgress();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                displayQuestion(currentQuestionIndex + 1);
+                updateProgress();
+            }
+        });
+
+        submitBtn.addEventListener('click', () => finishExam());
+
+        flagBtn.addEventListener('click', () => {
+            flagBtn.classList.toggle('flagged');
+        });
+
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressPercent.textContent = `${Math.round(progress)}%`;
+        }
+
+        // Timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Finish exam
+        function finishExam() {
+            clearInterval(timerInterval);
+
+            let correct = 0;
+            const answerDetails = [];
+            
+            questions.forEach((question, index) => {
+                const userAnswer = answers[index];
+                const correctAnswer = question.correct_answer;
+                const isCorrect = userAnswer === correctAnswer;
+                
+                if (isCorrect) correct++;
+                
+                answerDetails.push({
+                    question_id: index,
+                    answer: userAnswer || '',
+                    is_correct: isCorrect
+                });
+            });
+
+            const total = questions.length;
+            const percentage = Math.round((correct / total) * 100);
+
+            submitExam(correct, total, percentage, answerDetails);
+        }
+
+        // Submit exam
+        async function submitExam(correct, total, percentage, answers) {
+            try {
+                const response = await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_name: studentName,
+                        subject: urlSubjectName,
+                        session: selectedSession,
+                        score: correct,
+                        total_questions: total,
+                        percentage: percentage,
+                        answers: answers
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResults(correct, total, percentage);
+                } else {
+                    alert(data.error || 'Failed to submit exam');
+                }
+            } catch (error) {
+                console.error('Error submitting exam:', error);
+                alert('Failed to submit exam. Please try again.');
+            }
+        }
+
+        // Show results
+        function showResults(correct, total, percentage) {
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            document.getElementById('correctAnswers').textContent = correct;
+            document.getElementById('totalQuestions').textContent = total;
+            document.getElementById('timeTaken').textContent = timerDisplay.textContent;
+
+            const resultIcon = document.getElementById('resultIcon');
+            const resultMessage = document.getElementById('resultMessage');
+
+            if (percentage >= 80) {
+                resultIcon.className = 'result-icon success';
+                resultIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                resultMessage.textContent = 'Excellent! Outstanding performance!';
+            } else if (percentage >= 60) {
+                resultIcon.className = 'result-icon success';
+                resultIcon.innerHTML = '<i class="fas fa-star"></i>';
+                resultMessage.textContent = 'Good job! Well done!';
+            } else {
+                resultIcon.className = 'result-icon warning';
+                resultIcon.innerHTML = '<i class="fas fa-redo"></i>';
+                resultMessage.textContent = 'Keep practicing! You can do better!';
+            }
+
+            resultModal.classList.add('show');
+        }
+
+        finishBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (mainContent.style.display === 'none') return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (!prevBtn.disabled) prevBtn.click();
+                    break;
+                case 'ArrowRight':
+                    if (!nextBtn.disabled) nextBtn.click();
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    const optionIndex = parseInt(e.key) - 1;
+                    if (optionIndex < optionsGrid.children.length) {
+                        selectOption(optionIndex);
+                    }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

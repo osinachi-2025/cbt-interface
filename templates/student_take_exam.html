@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if exam_type == 'topic' %}{{ topic.topic_name }}{% else %}{{ subject.subject_name }}{% endif %} Exam - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .exam-container {
+            max-width: 900px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            margin: 2rem auto;
+            overflow: hidden;
+        }
+
+        .exam-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .exam-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .exam-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 0.95rem;
+            opacity: 0.9;
+            flex-wrap: wrap;
+        }
+
+        .exam-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .exam-content {
+            padding: 2rem;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-text {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .progress {
+            flex: 1;
+            height: 25px;
+            margin: 0 1rem;
+            background: #f0f0f0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option-radio {
+            position: relative;
+        }
+
+        .option-radio input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0;
+        }
+
+        .option-label:hover {
+            background: #f5f5f5;
+            border-color: #667eea;
+        }
+
+        .option-radio input[type="radio"]:checked + .option-label {
+            background: #e8eefe;
+            border-color: #667eea;
+        }
+
+        .option-label::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option-radio input[type="radio"]:checked + .option-label::before {
+            background: #667eea;
+            border-color: #667eea;
+            box-shadow: inset 0 0 0 4px white;
+        }
+
+        .option-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-submit {
+            padding: 0.9rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-cancel {
+            padding: 0.9rem 2rem;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 8px;
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-cancel:hover {
+            background: #d0d0d0;
+            color: #333;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .exam-container {
+                margin: 1rem;
+            }
+
+            .exam-header {
+                padding: 1.5rem;
+            }
+
+            .exam-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .exam-content {
+                padding: 1.5rem;
+            }
+
+            .exam-meta {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .progress-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progress {
+                margin: 0;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .exam-actions {
+                flex-direction: column;
+            }
+
+            .btn-submit, .btn-cancel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-container">
+        <!-- Header -->
+        <div class="exam-header">
+            <h1>
+                {% if exam_type == 'topic' %}
+                    <i class="fas fa-tag me-2"></i>{{ topic.topic_name }}
+                {% else %}
+                    <i class="fas fa-book me-2"></i>{{ subject.subject_name }} - Full Exam
+                {% endif %}
+            </h1>
+            <div class="exam-meta">
+                <div class="exam-meta-item">
+                    <i class="fas fa-questions"></i>
+                    <span>{{ questions|length }} Questions</span>
+                </div>
+                <div class="exam-meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>{{ questions|length * 2 }} minutes</span>
+                </div>
+                <div class="exam-meta-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Session: {{ session_id.replace('_', ' ')|title }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="exam-content">
+            {% if questions|length == 0 %}
+            <div style="text-align: center; padding: 2rem;">
+                <p style="color: #666; margin-bottom: 1rem;">No questions available for this exam.</p>
+                <a href="{{ url_for('student_exam_mode', subject_id=subject.subject_id, session_id=session_id) }}" class="btn-cancel">
+                    <i class="fas fa-arrow-left"></i> Back to Mode Selection
+                </a>
+            </div>
+            {% else %}
+
+            <div class="progress-container">
+                <span class="progress-text">Progress:</span>
+                <div class="progress">
+                    <div class="progress-bar" id="progress-bar" style="width: 0%">
+                        <span id="progress-text">0/{{ questions|length }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <form id="exam-form" method="POST" action="{{ url_for('student_submit_exam') }}">
+                <input type="hidden" name="subject_id" value="{{ subject.subject_id }}">
+                <input type="hidden" name="session_id" value="{{ session_id }}">
+                <input type="hidden" name="exam_type" value="{{ exam_type }}">
+                {% if exam_type == 'topic' and topic %}
+                <input type="hidden" name="topic_id" value="{{ topic.topic_id }}">
+                {% endif %}
+
+                {% for index, question in enumerate(questions) %}
+                <div class="question-card">
+                    <div class="question-number">Question {{ index + 1 }} of {{ questions|length }}</div>
+                    <div class="question-text">{{ question.question_text }}</div>
+                    
+                    {% if question.question_image %}
+                    <div class="question-image-container" style="margin: 1rem 0;">
+                        <img src="{{ url_for('static', filename=question.question_image) }}" 
+                             alt="Question image" 
+                             style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    </div>
+                    {% endif %}
+
+                    <div class="options-group">
+                        {% if question.question_type == 'true_false' %}
+                            {% for option_letter, option_text in [('T', 'True'), ('F', 'False')] %}
+                            <div class="option-radio">
+                                <input type="radio" 
+                                       id="q{{ question.id }}_{{ option_letter }}" 
+                                       name="question_{{ question.id }}" 
+                                       value="{{ option_letter }}"
+                                       onchange="updateProgress()">
+                                <label for="q{{ question.id }}_{{ option_letter }}" class="option-label">
+                                    <span class="option-text"><strong>{{ option_letter }}.</strong> {{ option_text }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            {% for option_letter, option_text in [('A', question.option_a), ('B', question.option_b), ('C', question.option_c), ('D', question.option_d)] %}
+                            <div class="option-radio">
+                                <input type="radio" 
+                                       id="q{{ question.id }}_{{ option_letter }}" 
+                                       name="question_{{ question.id }}" 
+                                       value="{{ option_letter }}"
+                                       onchange="updateProgress()">
+                                <label for="q{{ question.id }}_{{ option_letter }}" class="option-label">
+                                    <span class="option-text"><strong>{{ option_letter }}.</strong> {{ option_text }}</span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="exam-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-check me-2"></i>Submit Exam
+                    </button>
+                    <a href="{{ url_for('student_exam_mode', subject_id=subject.subject_id, session_id=session_id) }}" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function updateProgress() {
+            const totalQuestions = {{ questions|length }};
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const progressPercent = (answered / totalQuestions) * 100;
+            
+            document.getElementById('progress-bar').style.width = progressPercent + '%';
+            document.getElementById('progress-text').textContent = answered + '/' + totalQuestions;
+        }
+
+        document.getElementById('exam-form').addEventListener('submit', function(e) {
+            const totalQuestions = {{ questions|length }};
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            
+            if (answered < totalQuestions) {
+                e.preventDefault();
+                const unanswered = totalQuestions - answered;
+                alert(`You have ${unanswered} unanswered question(s). Please answer all questions before submitting.`);
+                return;
+            }
+            
+            if (!confirm('Are you sure you want to submit this exam? You cannot change your answers after submission.')) {
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

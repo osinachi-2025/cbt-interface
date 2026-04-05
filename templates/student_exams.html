@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Exam - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .exam-selection-container {
+            max-width: 700px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 3rem 2rem;
+            margin: 2rem auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .form-control {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-back {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .btn-back a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-back a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .exam-selection-container {
+                padding: 2rem 1.5rem;
+                margin: 1rem auto;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="exam-selection-container">
+        <div class="header">
+            <h1><i class="fas fa-book-open"></i> Start Exam</h1>
+            <p>Select a subject and session to begin your exam</p>
+        </div>
+
+        {% if error %}
+        <div style="background: #fee2e2; border: 2px solid #ef4444; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #991b1b;">
+            <strong><i class="fas fa-exclamation-circle"></i> Error:</strong> {{ error }}
+        </div>
+        {% endif %}
+
+        {% if subjects and sessions %}
+        <form id="exam-selection-form" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="subject" class="form-label">Select Subject</label>
+                <select id="subject" class="form-control" required>
+                    <option value="">-- Choose a subject --</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.subject_id }}">{{ subject.subject_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="session" class="form-label">Select Session</label>
+                <select id="session" class="form-control" required>
+                    <option value="">-- Choose a session --</option>
+                    {% for s in sessions %}
+                    <option value="{{ s.session_id }}">{{ s.exam_session }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-arrow-right"></i> Continue
+            </button>
+        </form>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; background: #f8f9fa; border-radius: 8px; margin: 2rem 0;">
+            <i class="fas fa-info-circle" style="font-size: 2rem; color: #667eea; margin-bottom: 1rem;"></i>
+            <p style="color: #666; font-size: 1.1rem; margin-bottom: 1rem;">
+                {% if not subjects %}
+                    No subjects are currently available. Please contact an administrator.
+                {% elif not sessions %}
+                    No exam sessions are currently available. Please contact an administrator.
+                {% else %}
+                    Unable to load exam data. Please try again later.
+                {% endif %}
+            </p>
+            <p style="color: #999; font-size: 0.9rem;">
+                (Subjects: {{ subjects|length }}, Sessions: {{ sessions|length }})
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="btn-back">
+            <a href="{{ url_for('home') }}"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            console.log('Form submitted');
+            
+            const subjectId = document.getElementById('subject').value;
+            const sessionId = document.getElementById('session').value;
+            
+            console.log('Subject ID:', subjectId);
+            console.log('Session ID:', sessionId);
+            
+            if (!subjectId || !sessionId) {
+                console.error('Missing subject or session');
+                alert('Please select both subject and session');
+                return;
+            }
+            
+            const redirectUrl = `/student/exam-mode/${subjectId}/${sessionId}`;
+            console.log('Redirecting to:', redirectUrl);
+            window.location.href = redirectUrl;
+        }
+    </script>
+</body>
+</html>

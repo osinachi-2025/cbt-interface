@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Exam Mode - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 32px 80px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .mode-selection-container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .header-title i {
+            font-size: 3rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .session-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .session-info-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .session-info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .session-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .session-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .mode-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .mode-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2.5rem 2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: var(--transition);
+            transform-origin: left;
+        }
+
+        .mode-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .mode-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .mode-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .mode-description {
+            font-size: 0.95rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .mode-features {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .feature-icon {
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .select-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .mode-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .session-info-content {
+                grid-template-columns: 1fr;
+            }
+
+            .select-btn {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.75rem;
+            }
+
+            .header-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .mode-card {
+                padding: 1.5rem 1.25rem;
+            }
+
+            .mode-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+
+            .mode-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="mode-selection-container">
+            <!-- Back Button -->
+            <button class="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i>
+                Change Subject/Session
+            </button>
+
+            <!-- Header -->
+            <div class="header-section">
+                <div class="header-title">
+                    <i class="fas fa-book-open"></i>
+                    Choose Exam Mode
+                </div>
+                <p class="header-subtitle">
+                    Select between a full exam or practice specific topics to prepare effectively
+                </p>
+            </div>
+
+            <!-- Session Info -->
+            <div class="session-info">
+                <div class="session-info-content">
+                    <div class="session-info-item">
+                        <div class="session-label">Student</div>
+                        <div class="session-value" id="studentNameDisplay">-</div>
+                    </div>
+                    <div class="session-info-item">
+                        <div class="session-label">Subject</div>
+                        <div class="session-value" id="subjectDisplay">-</div>
+                    </div>
+                    <div class="session-info-item">
+                        <div class="session-label">Session</div>
+                        <div class="session-value" id="sessionDisplay">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mode Selection Cards -->
+            <div class="mode-cards-grid">
+                <!-- Full Exam Card -->
+                <div class="mode-card">
+                    <div class="mode-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="mode-title">Full Exam</h3>
+                    <p class="mode-description">
+                        Take a complete exam covering all topics in the selected subject
+                    </p>
+                    <div class="mode-features">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>All questions from the subject</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Timed examination</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Score and detailed results</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Official exam for the session</span>
+                        </div>
+                    </div>
+                    <button class="select-btn" onclick="startFullExam()">
+                        <i class="fas fa-play-circle"></i>
+                        Start Full Exam
+                    </button>
+                </div>
+
+                <!-- Practice Mode Card -->
+                <div class="mode-card">
+                    <div class="mode-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="mode-title">Practice Mode</h3>
+                    <p class="mode-description">
+                        Select specific topics and practice with questions from those topics
+                    </p>
+                    <div class="mode-features">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Choose specific topics</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Practice at your own pace</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Instant feedback on answers</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="fas fa-check-circle"></i></span>
+                            <span>Improve weak areas</span>
+                        </div>
+                    </div>
+                    <button class="select-btn" id="practiceBtn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="startPracticeMode()">
+                        <i class="fas fa-dumbbell"></i>
+                        Start Practice Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get session info from sessionStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const studentName = sessionStorage.getItem('studentName') || 'Student';
+            const subject = sessionStorage.getItem('selectedSubject') || 'Subject';
+            const session = sessionStorage.getItem('selectedSession_display') || sessionStorage.getItem('selectedSession') || 'Session';
+            
+            document.getElementById('studentNameDisplay').textContent = studentName;
+            document.getElementById('subjectDisplay').textContent = subject;
+            document.getElementById('sessionDisplay').textContent = session;
+        });
+
+        // Go back to subject/session selection
+        function goBack() {
+            // Redirect back to CBT interface to change selections
+            window.location.href = '/cbt';
+        }
+
+        // Start full exam
+        function startFullExam() {
+            const subjectId = sessionStorage.getItem('selectedSubjectId');
+            const sessionId = sessionStorage.getItem('selectedSession');
+            
+            if (!subjectId || !sessionId) {
+                alert('Subject or session information is missing. Please try again.');
+                window.location.href = '/cbt';
+                return;
+            }
+            
+            // Redirect to full exam interface
+            sessionStorage.setItem('examType', 'full');
+            window.location.href = `/full-exam?subject_id=${subjectId}&session=${sessionId}`;
+        }
+
+        // Start practice mode
+        function startPracticeMode() {
+            const subjectId = sessionStorage.getItem('selectedSubjectId');
+            const sessionId = sessionStorage.getItem('selectedSession');
+            
+            if (!subjectId || !sessionId) {
+                alert('Subject or session information is missing. Please try again.');
+                window.location.href = '/cbt';
+                return;
+            }
+            
+            // Redirect to practice mode topic selection
+            sessionStorage.setItem('examType', 'practice');
+            window.location.href = `/practice-mode?subject_id=${subjectId}&session=${sessionId}`;
+        }
+    </script>
+</body>
+</html>

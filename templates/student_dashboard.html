@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename = '/css/bootstrap.min.css')}}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2d28 0%, #1a3a2e 50%, #0d5a52 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            color: #333;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 0 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1001;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 0.75rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.4);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.5rem;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-brand:hover {
+            color: #FF6B35;
+        }
+
+        .sidebar-brand-icon {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.25);
+        }
+
+        .sidebar-brand h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin: 0;
+            color: #1a1a1a;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 1rem;
+        }
+
+        .nav-section {
+            margin-bottom: 2rem;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #FF6B35;
+            margin-bottom: 1rem;
+            padding: 0 1rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            color: #666;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 107, 53, 0.08);
+            color: #FF6B35;
+            padding-left: 2rem;
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(247, 147, 30, 0.1) 100%);
+            color: #FF6B35;
+            border-left: 4px solid #FF6B35;
+            padding-left: 1.5rem;
+            font-weight: 700;
+        }
+
+        .nav-link i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 2px solid rgba(255, 107, 53, 0.1);
+            margin-top: auto;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 107, 53, 0.05);
+            border-radius: 10px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-details p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 700;
+            color: #1a1a1a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-role {
+            color: #FF6B35;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logout-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            transition: left 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(255, 107, 53, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .logout-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 2rem;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="dots-subtle" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1.5" fill="rgba(255,107,53,0.04)"/></pattern></defs><rect width="1200" height="600" fill="url(%23dots-subtle)"/></svg>');
+            background-size: cover, auto;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .welcome-text h1 {
+            color: #1a1a1a;
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .welcome-text p {
+            color: #666;
+            margin: 0.5rem 0 0 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.08) 0%, rgba(247, 147, 30, 0.08) 100%);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 107, 53, 0.2);
+            animation: slideUp 0.6s ease-out 0.1s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 800;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+            flex-shrink: 0;
+        }
+
+        .profile-info h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .profile-info p {
+            color: #666;
+            margin: 0.5rem 0 0 0;
+            font-size: 1rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .profile-stat-item {
+            text-align: center;
+        }
+
+        .profile-stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #FF6B35;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-stat-label {
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+            border-radius: 15px;
+            padding: 1.8rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 107, 53, 0.1);
+            transition: all 0.3s ease;
+            animation: slideUp 0.6s ease-out both;
+        }
+
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.2s; }
+        .stat-card:nth-child(4) { animation-delay: 0.3s; }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.25);
+        }
+
+        .stat-icon.exams { background: linear-gradient(135deg, #FF6B35, #F7931E); color: white; }
+        .stat-icon.average { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
+        .stat-icon.highest { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
+        .stat-icon.pass { background: linear-gradient(135deg, #43e97b, #38f9d7); color: white; }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        /* Content Section */
+        .content-section {
+            background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.95) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 107, 53, 0.1);
+            animation: slideUp 0.6s ease-out 0.2s both;
+        }
+
+        .section-title {
+            color: #1a1a1a;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 0 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .section-title i {
+            color: #FF6B35;
+        }
+
+        .subject-group {
+            margin-bottom: 2rem;
+        }
+
+        .subject-header {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .exam-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .exam-table th,
+        .exam-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .exam-table th {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.08) 100%);
+            font-weight: 700;
+            color: #1a1a1a;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .exam-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .exam-table tbody tr:hover {
+            background: rgba(255, 107, 53, 0.05);
+            transform: scale(1.01);
+        }
+
+        .exam-table tbody td {
+            color: #555;
+            font-weight: 500;
+        }
+
+        .score-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .score-pass { 
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            box-shadow: 0 2px 8px rgba(21, 87, 36, 0.2);
+        }
+
+        .score-fail { 
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            box-shadow: 0 2px 8px rgba(114, 28, 36, 0.2);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .no-results i {
+            color: #FF6B35;
+            opacity: 0.5;
+        }
+
+        .no-results p {
+            margin-top: 1rem;
+            font-size: 1rem;
+        }
+
+        .no-results a {
+            color: #FF6B35;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .no-results a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+
+            .main-content {
+                margin-left: 250px;
+                padding: 1.5rem;
+            }
+
+            .dashboard-header {
+                padding: 2rem;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-cards {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .stat-card {
+                padding: 1.3rem;
+            }
+
+            .profile-header {
+                gap: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+
+            .profile-info h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 0.75rem;
+                padding-top: 3.5rem;
+            }
+
+            .sidebar {
+                width: 280px;
+                left: 0;
+                transition: all 0.3s ease;
+            }
+
+            .sidebar.mobile-hidden {
+                transform: translateX(-100%);
+            }
+
+            .sidebar-toggle {
+                display: flex;
+            }
+
+            .sidebar-header {
+                padding: 1rem 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .sidebar-brand h3 {
+                font-size: 1.2rem;
+            }
+
+            .nav-link {
+                padding: 0.85rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .nav-section-title {
+                font-size: 0.7rem;
+            }
+
+            .user-details {
+                display: block;
+            }
+
+            .logout-btn {
+                padding: 0.85rem;
+            }
+
+            .dashboard-header {
+                padding: 1.2rem;
+                margin-bottom: 1rem;
+                border-radius: 15px;
+            }
+
+            .welcome-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.3rem;
+            }
+
+            .welcome-text p {
+                font-size: 0.85rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+
+            .profile-info h2 {
+                font-size: 1.5rem;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr 1fr;
+                padding-top: 1rem;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .exam-table th,
+            .exam-table td {
+                padding: 0.75rem;
+            }
+
+            .exam-table {
+                font-size: 0.9rem;
+            }
+
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                margin-left: 0;
+                padding: 0.5rem;
+                padding-top: 3rem;
+            }
+
+            .sidebar-toggle {
+                left: 0.5rem;
+                top: 0.5rem;
+                padding: 0.5rem 0.7rem;
+                font-size: 1.1rem;
+            }
+
+            .dashboard-header {
+                padding: 1rem;
+                margin-bottom: 0.75rem;
+                border-radius: 12px;
+            }
+
+            .welcome-text h1 {
+                font-size: 1.1rem;
+                margin-bottom: 0.2rem;
+            }
+
+            .welcome-text p {
+                font-size: 0.75rem;
+            }
+
+            .profile-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 1.75rem;
+            }
+
+            .profile-info h2 {
+                font-size: 1.3rem;
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+
+            .stats-cards {
+                gap: 0.8rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.6rem;
+            }
+
+            .stat-label {
+                font-size: 0.75rem;
+            }
+
+            .stat-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+                margin-bottom: 1rem;
+            }
+
+            .exam-table th,
+            .exam-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .score-badge {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.7rem;
+            }
+
+            .subject-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .subject-header {
+                padding: 0.8rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content {
+                padding: 0.5rem;
+                padding-top: 2.8rem;
+            }
+
+            .sidebar-toggle {
+                padding: 0.4rem 0.6rem;
+                font-size: 1rem;
+            }
+
+            .dashboard-header {
+                padding: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .welcome-text h1 {
+                font-size: 1rem;
+            }
+
+            .welcome-text p {
+                display: none;
+            }
+
+            .profile-header {
+                margin-bottom: 1.5rem;
+            }
+
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+
+            .profile-info h2 {
+                font-size: 1.1rem;
+            }
+
+            .profile-stats {
+                gap: 0.6rem;
+            }
+
+            .stats-cards {
+                gap: 0.6rem;
+            }
+
+            .stat-card {
+                padding: 0.8rem;
+            }
+
+            .stat-value {
+                font-size: 1.4rem;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .content-section {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+            }
+
+            .exam-table {
+                font-size: 0.75rem;
+            }
+
+            .exam-table th,
+            .exam-table td {
+                padding: 0.4rem;
+            }
+
+            .no-results {
+                padding: 2rem 0.5rem;
+            }
+
+            .no-results i {
+                font-size: 2rem;
+            }
+
+            .no-results p {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{{ url_for('student_dashboard') }}" class="sidebar-brand">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>CBT Pro</h3>
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <p class="nav-section-title">Main</p>
+                <a href="{{ url_for('student_dashboard') }}" class="nav-link active">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('home') }}" class="nav-link">
+                    <i class="fas fa-pencil-alt"></i>
+                    <span>Take Exam</span>
+                </a>
+            </div>
+
+            <div class="nav-section">
+                <p class="nav-section-title">Profile</p>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- User Info & Logout -->
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ session.firstname[0].upper() }}
+                </div>
+                <div class="user-details">
+                    <p class="user-name">{{ session.firstname }} {{ session.lastname }}</p>
+                    <p class="user-role">Student</p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <div class="welcome-text">
+                    <h1><i class="fas fa-chart-line me-3"></i>My Dashboard</h1>
+                    <p>Welcome back, {{ session.firstname }}! Here's your exam performance overview.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Profile Section -->
+        <div class="profile-section">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    {{ session.firstname[0].upper() }}
+                </div>
+                <div class="profile-info">
+                    <h2>{{ session.firstname }} {{ session.lastname }}</h2>
+                    <p><i class="fas fa-school me-2"></i>{{ session.school if session.school else 'School Name' }}</p>
+                    <p><i class="fas fa-graduation-cap me-2"></i>{{ session.student_class if session.student_class else 'Class/Grade' }}</p>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat-item">
+                    <div class="profile-stat-value">{{ stats.total_exams }}</div>
+                    <div class="profile-stat-label">Exams Taken</div>
+                </div>
+                <div class="profile-stat-item">
+                    <div class="profile-stat-value">{{ "%.1f"|format(stats.average_score) }}%</div>
+                    <div class="profile-stat-label">Average Score</div>
+                </div>
+                <div class="profile-stat-item">
+                    <div class="profile-stat-value">{{ "%.1f"|format(stats.highest_score) }}%</div>
+                    <div class="profile-stat-label">Highest Score</div>
+                </div>
+                <div class="profile-stat-item">
+                    <div class="profile-stat-value">{{ "%.1f"|format(stats.pass_rate) }}%</div>
+                    <div class="profile-stat-label">Pass Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon exams">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div class="stat-value">{{ stats.total_exams }}</div>
+                <div class="stat-label">Total Exams Taken</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon average">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="stat-value">{{ "%.1f"|format(stats.average_score) }}%</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon highest">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="stat-value">{{ "%.1f"|format(stats.highest_score) }}%</div>
+                <div class="stat-label">Highest Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pass">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-value">{{ "%.1f"|format(stats.pass_rate) }}%</div>
+                <div class="stat-label">Pass Rate</div>
+            </div>
+        </div>
+
+        <!-- Exam Results by Subject -->
+        <div class="content-section">
+            <h2 class="section-title">
+                <i class="fas fa-book"></i>My Exam Results
+            </h2>
+            
+            {% if exams_by_subject %}
+                {% for subject, subject_results in exams_by_subject.items() %}
+                <div class="subject-group">
+                    <div class="subject-header">
+                        <i class="fas fa-graduation-cap me-2"></i>{{ subject }}
+                    </div>
+                    <table class="exam-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Session</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in subject_results %}
+                            <tr>
+                                <td>{{ result.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>{{ result.session_id.replace('_', ' ') if result.session_id else 'N/A' }}</td>
+                                <td>{{ result.score }}/{{ result.total_questions }}</td>
+                                <td>{{ "%.1f"|format(result.percentage) }}%</td>
+                                <td>
+                                    <span class="score-badge {{ 'score-pass' if result.percentage >= 50 else 'score-fail' }}">
+                                        {{ 'Pass' if result.percentage >= 50 else 'Fail' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-results">
+                    <i class="fas fa-info-circle fa-3x mb-3 text-muted"></i>
+                    <p>You haven't taken any exams yet. <a href="{{ url_for('home') }}">Start your first exam</a> to see your results here!</p>
+                </div>
+            {% endif %}
+        </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mainContent = document.querySelector('.main-content');
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('mobile-hidden');
+            });
+
+            // Close sidebar when clicking on main content (mobile)
+            if (mainContent) {
+                mainContent.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.add('mobile-hidden');
+                    }
+                });
+            }
+        }
+
+        // Close sidebar when window is resized to desktop view
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('mobile-hidden');
+            }
+        });
+
+        // Active navigation link highlighting
+        const currentLocation = location.pathname;
+        const menuItems = document.querySelectorAll('.nav-link');
+        menuItems.forEach(item => {
+            if (item.getAttribute('href') === currentLocation) {
+                item.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

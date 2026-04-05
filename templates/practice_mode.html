@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Mode - Select Topics - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 32px 80px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .practice-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .header-title i {
+            font-size: 3rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .session-info {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .session-info-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .session-info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .session-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .session-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .topics-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+        }
+
+        .topics-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .topics-header-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .topics-header-text h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+        }
+
+        .topics-header-text p {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0.25rem 0 0 0;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .topic-card {
+            background: white;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .topic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--success-gradient);
+            transform: scaleX(0);
+            transition: var(--transition);
+            transform-origin: left;
+        }
+
+        .topic-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .topic-card:hover {
+            border-color: #667eea;
+            box-shadow: var(--shadow-light);
+            transform: translateY(-3px);
+        }
+
+        .topic-card.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            box-shadow: var(--shadow-light);
+        }
+
+        .topic-card.selected::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--success-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .topic-card.selected::after {
+            content: '✓';
+            display: flex;
+        }
+
+        .topic-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .topic-description {
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 3rem;
+            color: #667eea;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-action {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-height: 48px;
+        }
+
+        .btn-start {
+            background: var(--success-gradient);
+            color: white;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-start:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .select-all-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .select-all-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .select-all-label {
+            font-weight: 500;
+            color: #667eea;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .selection-counter {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .error-message {
+            background: rgba(245, 87, 108, 0.1);
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            color: #f5576c;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Animations */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 2rem;
+            }
+
+            .topics-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-start {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                padding: 1rem;
+            }
+
+            .header-title {
+                font-size: 1.75rem;
+            }
+
+            .topics-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .topics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-action {
+                font-size: 0.95rem;
+                padding: 0.875rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="practice-container">
+            <!-- Header -->
+            <div class="header-section">
+                <div class="header-title">
+                    <i class="fas fa-book-reader"></i>
+                    Practice Mode
+                </div>
+                <p class="header-subtitle">
+                    Select one or more topics to practice questions on specific areas
+                </p>
+            </div>
+
+            <!-- Session Info -->
+            <div class="session-info">
+                <div class="session-info-content">
+                    <div class="session-info-item">
+                        <div class="session-label">Subject</div>
+                        <div class="session-value" id="subjectDisplay">-</div>
+                    </div>
+                    <div class="session-info-item">
+                        <div class="session-label">Session</div>
+                        <div class="session-value" id="sessionDisplay">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Selection -->
+            <div class="topics-section">
+                <!-- Error Message -->
+                <div class="error-message" id="errorMessage">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText">Please select at least one topic to continue</span>
+                </div>
+
+                <!-- Topics Header -->
+                <div class="topics-header">
+                    <div class="topics-header-icon">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <div class="topics-header-text">
+                        <h3>Available Topics</h3>
+                        <p>Click on a topic to select or deselect it</p>
+                    </div>
+                </div>
+
+                <!-- Select All -->
+                <div class="select-all-section">
+                    <input type="checkbox" id="selectAllCheckbox" class="select-all-checkbox">
+                    <label for="selectAllCheckbox" class="select-all-label">
+                        <strong>Select All Topics</strong>
+                    </label>
+                    <div class="selection-counter">
+                        <span id="selectedCount">0</span> selected
+                    </div>
+                </div>
+
+                <!-- Topics Grid -->
+                <div class="topics-grid" id="topicsGrid">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <span>Loading topics...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; justify-content: flex-start; gap: 1rem; margin-top: 2rem;">
+                <button class="btn-action btn-back" onclick="goBack()">
+                    <i class="fas fa-arrow-left"></i>
+                    Change Mode
+                </button>
+                <button class="btn-action btn-start" id="startPracticeBtn" onclick="startPractice()" disabled>
+                    <i class="fas fa-play-circle"></i>
+                    Start Practice
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const subjectId = new URLSearchParams(window.location.search).get('subject_id');
+        const sessionId = new URLSearchParams(window.location.search).get('session');
+        
+        let topics = [];
+        let selectedTopics = new Set();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display session info
+            const subject = sessionStorage.getItem('selectedSubject') || 'Subject';
+            const sessionDisplay = sessionStorage.getItem('selectedSession_display') || sessionStorage.getItem('selectedSession') || 'Session';
+            
+            document.getElementById('subjectDisplay').textContent = subject;
+            document.getElementById('sessionDisplay').textContent = sessionDisplay;
+
+            // Load topics
+            loadTopics();
+
+            // Setup select all checkbox
+            document.getElementById('selectAllCheckbox').addEventListener('change', function() {
+                if (this.checked) {
+                    topics.forEach(topic => selectedTopics.add(topic.id || topic.topic_id));
+                } else {
+                    selectedTopics.clear();
+                }
+                renderTopics();
+                updateSelectionCounter();
+            });
+        });
+
+        async function loadTopics() {
+            try {
+                console.log('[DEBUG] Loading topics for subject_id:', subjectId);
+                const response = await fetch(`/api/get-topics/${subjectId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('[DEBUG] Topics API response:', data);
+                topics = data.topics || data; // Handle both response formats
+                console.log('[DEBUG] Parsed topics:', topics);
+                console.log('[DEBUG] Topics count:', topics.length);
+                
+                renderTopics();
+            } catch (error) {
+                console.error('Error loading topics:', error);
+                document.getElementById('topicsGrid').innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #f5576c;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                        <p>Failed to load topics. Please try again.</p>
+                        <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderTopics() {
+            const grid = document.getElementById('topicsGrid');
+            console.log('[DEBUG] renderTopics called with topics:', topics);
+            if (topics.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #666;">
+                        <p>No topics available for this subject.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = topics.map(topic => {
+                const topicId = topic.id || topic.topic_id;
+                const isSelected = selectedTopics.has(topicId);
+                console.log(`[DEBUG] Rendering topic ${topicId}: "${topic.name || topic.topic_name}" (selected: ${isSelected})`);
+                return `
+                    <div class="topic-card ${isSelected ? 'selected' : ''}" 
+                         onclick="toggleTopic(${topicId})" 
+                         style="cursor: pointer;"
+                         data-topic-id="${topicId}">
+                        <div class="topic-name">${topic.name || topic.topic_name}</div>
+                        <div class="topic-description">${topic.description || 'No description available'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleTopic(topicId) {
+            console.log('[DEBUG] toggleTopic called with:', topicId, typeof topicId);
+            if (selectedTopics.has(topicId)) {
+                selectedTopics.delete(topicId);
+            } else {
+                selectedTopics.add(topicId);
+            }
+            
+            console.log('[DEBUG] Current selectedTopics:', Array.from(selectedTopics));
+            
+            // Update select all checkbox
+            const allSelected = selectedTopics.size === topics.length;
+            document.getElementById('selectAllCheckbox').checked = allSelected;
+            
+            renderTopics();
+            updateSelectionCounter();
+        }
+
+        function updateSelectionCounter() {
+            document.getElementById('selectedCount').textContent = selectedTopics.size;
+            document.getElementById('startPracticeBtn').disabled = selectedTopics.size === 0;
+        }
+
+        function startPractice() {
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (selectedTopics.size === 0) {
+                errorMessage.classList.add('show');
+                setTimeout(() => errorMessage.classList.remove('show'), 3000);
+                return;
+            }
+
+            // Store selected topics in sessionStorage
+            const topicsArray = Array.from(selectedTopics);
+            console.log('[DEBUG] Selected topics:', topicsArray);
+            sessionStorage.setItem('practiceTopics', JSON.stringify(topicsArray));
+            
+            console.log('[DEBUG] Redirecting to practice exam');
+            console.log('[DEBUG] Subject ID:', subjectId);
+            console.log('[DEBUG] Session ID:', sessionId);
+            
+            // Redirect to practice exam
+            window.location.href = `/practice-exam?subject_id=${subjectId}&session=${sessionId}`;
+        }
+
+        function goBack() {
+            window.location.href = `/exam-mode-selection?subject_id=${subjectId}&session=${sessionId}`;
+        }
+    </script>
+</body>
+</html>

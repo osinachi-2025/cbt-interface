@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Exam Mode - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .mode-selection-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .mode-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .mode-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .mode-card-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .mode-card h2 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .mode-card p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .mode-card-btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .mode-card-btn:hover {
+            transform: scale(1.05);
+            color: white;
+            text-decoration: none;
+        }
+
+        .mode-card-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .topics-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .topics-section.show {
+            display: block !important;
+        }
+
+        .topics-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .topics-header h3 {
+            color: #333;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .topics-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .topic-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .topic-item:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .topic-item a {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            font-weight: 600;
+        }
+
+        .topic-item small {
+            display: block;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        .back-button {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-button a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+
+        .back-button a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .mode-cards {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .mode-card {
+                padding: 1.5rem;
+            }
+
+            .mode-card-icon {
+                font-size: 2.5rem;
+            }
+
+            .topics-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="mode-selection-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-layer-group"></i> Exam Selection</h1>
+            <p>Subject: <strong>{{ subject.subject_name if subject else 'Unknown' }}</strong></p>
+            <p>Session: <strong>{{ session_id.replace('_', ' ')|title if session_id else 'N/A' }}</strong></p>
+        </div>
+
+        <!-- Mode Selection Cards -->
+        <div class="mode-cards">
+            <!-- Full Exam Card -->
+            <div class="mode-card">
+                <div class="mode-card-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h2>Full Subject Exam</h2>
+                <p>Answer all questions for this subject in one session</p>
+                {% if subject %}
+                    <a href="{{ url_for('student_take_full_exam', subject_id=subject.subject_id, session_id=session_id) }}" class="mode-card-btn">
+                        <i class="fas fa-arrow-right"></i> Start Exam
+                    </a>
+                {% else %}
+                    <button type="button" class="mode-card-btn" disabled>
+                        <i class="fas fa-times"></i> Subject Not Found
+                    </button>
+                {% endif %}
+            </div>
+
+            <!-- Topic Practice Card -->
+            <div class="mode-card">
+                <div class="mode-card-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h2>Topic Practice</h2>
+                <p>Practice specific topics one at a time</p>
+                {% if topics %}
+                    <button type="button" class="mode-card-btn" onclick="toggleTopics()" style="background: #764ba2;">
+                        <i class="fas fa-list"></i> Choose Topic
+                    </button>
+                {% else %}
+                    <button type="button" class="mode-card-btn" disabled>
+                        <i class="fas fa-exclamation"></i> No Topics Available
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Topics Section -->
+        {% if topics %}
+        <div class="topics-section" id="topics-section">
+            <div class="topics-header">
+                <h3><i class="fas fa-list"></i> Available Topics ({{ topics|length }})</h3>
+            </div>
+            <div class="topics-list">
+                {% for topic in topics %}
+                <div class="topic-item">
+                    <a href="{{ url_for('student_take_topic_exam', topic_id=topic.topic_id, session_id=session_id) }}">
+                        <strong>{{ topic.topic_name }}</strong>
+                        <small>→ Start exam</small>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Back Button -->
+        <div class="back-button">
+            <a href="{{ url_for('student_exams_select') }}"><i class="fas fa-arrow-left"></i> Back to Subject Selection</a>
+        </div>
+    </div>
+
+    <script>
+        console.log('Exam mode page loaded');
+        console.log('Subject:', '{{ subject.subject_name if subject else "None" }}');
+        console.log('Session:', '{{ session_id if session_id else "None" }}');
+        console.log('Topics count:', {{ topics|length if topics else 0 }});
+
+        function toggleTopics() {
+            const section = document.getElementById('topics-section');
+            if (section) {
+                console.log('Toggling topics section');
+                section.classList.toggle('show');
+                if (section.classList.contains('show')) {
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+    </script>
+</body>
+</html>

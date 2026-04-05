@@ -1,0 +1,8 @@
+flask 
+flask-cors
+flask-sqlalchemy
+email-validator
+psycopg2-binary
+python-dotenv
+flask-migrate
+flask-jwt-extended

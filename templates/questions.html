@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Question Bank - CBT System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename = '/css/bootstrap.min.css')}}">
+    <style>
+        body {
+            background: linear-gradient(135deg, #5C4033 0%, #3E2723 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><pattern id="lines" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse"><line x1="0" y1="0" x2="60" y2="60" stroke="rgba(255,255,255,0.04)" stroke-width="1"/></pattern></defs><rect width="1200" height="800" fill="%235C4033"/><rect width="1200" height="800" fill="url(%23lines)"/></svg>');
+            background-size: cover, auto;
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .questions-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .welcome-text h1 {
+            color: #333;
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .welcome-text p {
+            color: #666;
+            margin: 0.5rem 0 0 0;
+            font-size: 1.1rem;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            min-height: 40px; /* Ensure minimum height */
+            padding: 0.5rem 0; /* Add some padding */
+        }
+        .btn-nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid #667eea; /* Add visible border */
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            display: inline-block; /* Ensure block display */
+        }
+        .btn-nav:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .add-question-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .section-title {
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .question-form .form-control {
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .question-form .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+            background: white;
+        }
+        .question-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .option-input {
+            position: relative;
+        }
+        .option-label {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #667eea;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            z-index: 1;
+        }
+        .option-input .form-control {
+            padding-left: 3rem;
+        }
+        .correct-answer-section {
+            margin-top: 1.5rem;
+        }
+        .correct-answer-section .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .radio-group {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+        .radio-option label {
+            font-weight: 500;
+            color: #555;
+            cursor: pointer;
+        }
+        .btn-add-question {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.875rem 2rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-add-question::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-add-question:hover::before {
+            left: 100%;
+        }
+        .btn-add-question:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .questions-list-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .table-responsive {
+            border-radius: 12px;
+            overflow-y: auto;
+            max-height: 550px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+        .table {
+            margin: 0;
+            border: none;
+        }
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+        .table tbody td {
+            padding: 1rem;
+            border: none;
+            vertical-align: middle;
+            color: #555;
+        }
+        .question-text {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        .question-options {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .correct-answer-badge {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-action {
+            padding: 0.375rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        .btn-edit:hover {
+            background: linear-gradient(135deg, #e87bf8, #e54a61);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .btn-delete {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        .btn-delete:hover {
+            background: linear-gradient(135deg, #ff5a5a, #e54a42);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .questions-table {
+            transition: all 0.3s ease;
+        }
+        .no-questions i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        .session-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+        .session-header {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .session-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .session-title .badge {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .session-header {
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .session-title {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .session-title .badge {
+            font-size: 0.8rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+            margin-bottom: 1.5rem;
+            animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        /* Modal styles */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .modal-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+        .modal-body {
+            padding: 1.5rem;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .questions-container {
+                padding: 1rem;
+            }
+            .welcome-section {
+                flex-direction: column;
+                text-align: center;
+            }
+            .welcome-text h1 {
+                font-size: 2rem;
+            }
+            .nav-buttons {
+                justify-content: center;
+            }
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            .radio-group {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .table-responsive {
+                font-size: 0.85rem;
+                max-height: 450px;
+                overflow-y: auto;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+        .questions-table {
+            transition: all 0.3s ease;
+        }
+        .toggle-btn {
+            margin-left: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="questions-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="welcome-section">
+                <div class="welcome-text">
+                    <h1><i class="fas fa-question-circle me-2"></i>Question Bank</h1>
+                    <p>Manage your CBT exam questions and answers</p>
+                </div>
+                <div class="nav-buttons">
+                    <a href="{{ url_for('select_subject_session') }}" class="btn-nav">
+                        <i class="fas fa-plus-circle me-1"></i>Add Questions
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" class="btn-nav">
+                        <i class="fas fa-chart-line me-1"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('cbt_interface') }}" class="btn-nav">
+                        <i class="fas fa-play-circle me-1"></i>Start Exam
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="btn-nav">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions List Section -->
+        <div class="questions-list-section">
+            <h2 class="section-title">
+                <i class="fas fa-list me-2"></i>Your Questions ({{ total_questions }})
+            </h2>
+
+            {% if questions_by_session %}
+                {% for session_name, session_questions in questions_by_session.items() %}
+                <div class="session-section mb-5">
+                    <div class="session-header">
+                        <h3 class="session-title">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ session_name }}
+                            <span class="badge bg-primary ms-2">{{ session_questions|length }} questions</span>
+                            <button class="btn-nav toggle-btn" data-session="{{ session_name|replace(' ', '_') }}" style="margin-left: auto; font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                <i class="fas fa-eye me-1"></i><span>Show Questions</span>
+                            </button>
+                        </h3>
+                    </div>
+                    
+                    <div class="table-responsive questions-table" data-session="{{ session_name|replace(' ', '_') }}" style="display: none;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Question</th>
+                                    <th>Options</th>
+                                    <th>Correct Answer</th>
+                                    <th>Subject</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for question in session_questions %}
+                                <tr>
+                                    <td>
+                                        <div class="question-text">{{ question.question_text }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="question-options">
+                                            <div><strong>A:</strong> {{ question.option_a }}</div>
+                                            <div><strong>B:</strong> {{ question.option_b }}</div>
+                                            <div><strong>C:</strong> {{ question.option_c }}</div>
+                                            <div><strong>D:</strong> {{ question.option_d }}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="correct-answer-badge">{{ question.correct_answer }}</span>
+                                    </td>
+                                    <td>{{ question.subject or 'N/A' }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn btn-action btn-edit" onclick="editQuestion({{ question.id }})">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </button>
+                                            <button class="btn btn-action btn-delete" onclick="deleteQuestion({{ question.id }})">
+                                                <i class="fas fa-trash me-1"></i>Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-questions">
+                    <i class="fas fa-question-circle"></i>
+                    <h4>No Questions Yet</h4>
+                    <p><a href="{{ url_for('select_subject_session') }}" class="text-primary">Click here to add your first question</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this question? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-delete" id="confirmDeleteBtn">Delete Question</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let questionToDelete = null;
+        
+        // Handle individual toggle buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-btn');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const sessionName = this.getAttribute('data-session');
+                    const table = document.querySelector(`.questions-table[data-session="${sessionName}"]`);
+                    
+                    if (table) {
+                        const isHidden = table.style.display === 'none';
+                        table.style.display = isHidden ? 'block' : 'none';
+                        
+                        // Update button text and icon
+                        const icon = this.querySelector('i');
+                        const textSpan = this.querySelector('span');
+                        
+                        if (isHidden) {
+                            icon.className = 'fas fa-eye-slash me-1';
+                            textSpan.textContent = 'Hide Questions';
+                        } else {
+                            icon.className = 'fas fa-eye me-1';
+                            textSpan.textContent = 'Show Questions';
+                        }
+                    }
+                });
+            });
+        });
+
+        function editQuestion(questionId) {
+            // For now, redirect to edit page (we'll implement this later)
+            window.location.href = `/edit-question/${questionId}`;
+        }
+
+        function deleteQuestion(questionId) {
+            questionToDelete = questionId;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            deleteModal.show();
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+            if (questionToDelete) {
+                fetch(`/delete-question/${questionToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Failed to delete question: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('Error deleting question: ' + error.message);
+                });
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

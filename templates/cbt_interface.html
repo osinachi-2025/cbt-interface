@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern CBT Exam</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-light: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 32px 80px rgba(0, 0, 0, 0.2);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-gradient);
+            min-height: 100vh;
+            color: #1a1a1a;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+
+        .loading-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            display: none;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* Header */
+        .exam-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .exam-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .exam-title i {
+            color: #667eea;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .stat-value {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .timer-stat {
+            background: var(--warning-gradient);
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .progress-percentage {
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-medium);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .question-number {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .question-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: none;
+            color: #667eea;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .action-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.05);
+        }
+
+        .flag-btn.flagged {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1.6;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-item {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-item:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-light);
+        }
+
+        .option-item:hover::before {
+            left: 100%;
+        }
+
+        .option-item.selected {
+            background: var(--primary-gradient);
+            border-color: #667eea;
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option-item.selected .option-letter {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .option-text {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        /* Navigation */
+        .navigation-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-height: 48px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .nav-btn.secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .nav-btn.secondary:hover:not(:disabled) {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-heavy);
+            transform: scale(0.9);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .modal-title i {
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+            min-height: 48px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
+            padding-right: 2.5rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .modal-btn {
+            flex: 1;
+            background: var(--success-gradient);
+            border: none;
+            color: white;
+            padding: 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* Results Modal */
+        .results-modal .modal-content {
+            max-width: 600px;
+        }
+
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2rem;
+        }
+
+        .result-icon.success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .result-icon.warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-subtitle {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .result-details {
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+
+            .exam-header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-stats {
+                justify-content: center;
+            }
+
+            .question-card {
+                padding: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .option-item {
+                padding: 1rem;
+                min-height: 48px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+
+            .modal-content {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+
+            .result-score {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exam-title {
+                font-size: 1.25rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .option-text {
+                font-size: 0.95rem;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+
+            .form-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus states */
+        .option-item:focus,
+        .nav-btn:focus,
+        .action-btn:focus,
+        .modal-btn:focus {
+            outline: 2px solid #667eea;
+            outline-offset: 2px;
+        }
+
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --glass-bg: white;
+                --glass-border: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Preparing your exam</div>
+                <div class="loading-subtitle">Loading questions...</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div id="mainContent" class="main-content">
+            <!-- Exam Header -->
+            <header class="exam-header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="exam-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            CBT Examination
+                        </h1>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+                            <span id="headerStudentName"></span> • <span id="headerSessionName"></span>
+                        </div>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span>Question</span>
+                            <span class="stat-value" id="currentQuestion">1</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Time</span>
+                            <span class="stat-value timer-stat" id="timer">00:00</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Progress Bar -->
+            <section class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-label">Exam Progress</span>
+                    <span class="progress-percentage" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </section>
+
+            <!-- Question Card -->
+            <section class="question-card" id="questionCard">
+                <div class="question-header">
+                    <div class="question-number" id="questionNumber">Question 1</div>
+                    <div class="question-actions">
+                        <button class="action-btn flag-btn" id="flagBtn">
+                            <i class="fas fa-flag"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="question-text" id="questionText">
+                    Loading question...
+                </div>
+                <div class="options-grid" id="optionsGrid">
+                    <!-- Options will be populated here -->
+                </div>
+            </section>
+
+            <!-- Navigation -->
+            <section class="navigation-section">
+                <div class="nav-buttons">
+                    <button class="nav-btn secondary" id="prevBtn" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                        Previous
+                    </button>
+                    <button class="nav-btn" id="nextBtn">
+                        Next
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <!-- submit only shown on last question -->
+                    <button class="nav-btn" id="submitBtn" style="display:none;">
+                        <i class="fas fa-paper-plane"></i>
+                        Submit
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Student Info Modal -->
+    <div id="studentModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-user-graduate"></i>
+                    Student Information
+                </h2>
+            </div>
+            <form id="studentForm">
+                <div class="form-group">
+                    <label class="form-label" for="studentName">Full Name</label>
+                    <input type="text" id="studentName" class="form-input" placeholder="Enter your full name" readonly style="background-color: #f5f5f5; cursor: not-allowed; opacity: 0.9;">
+                </div>
+                <div class="form-group" id="subjectDropdownGroup">
+                    <label class="form-label" for="examSubject">Select Subject</label>
+                    <select id="examSubject" class="form-input form-select" required>
+                        <option value="">Select a subject</option>
+                    </select>
+                </div>
+                <div class="form-group" id="subjectDisplayGroup" style="display: none;">
+                    <label class="form-label">Selected Subject</label>
+                    <div style="background: rgba(102, 126, 234, 0.1); border-radius: 12px; padding: 0.75rem; border: 2px solid #667eea; color: #667eea; font-weight: 600;">
+                        <span id="subjectDisplayText">-</span>
+                    </div>
+                    <input type="hidden" id="examSubjectHidden">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="examSession">Select Session Year</label>
+                    <select id="examSession" class="form-input form-select" required>
+                        <option value="">Select session</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn" id="startExamBtn">
+                        <i class="fas fa-play"></i>
+                        Start Exam
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exam Summary Modal -->
+    <div id="summaryModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <i class="fas fa-clipboard-check"></i>
+                    Exam Confirmation
+                </h2>
+            </div>
+            <div style="padding: 2rem 1.5rem; text-align: center;">
+                <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">Please review your information</p>
+                
+                <div style="background: rgba(102, 126, 234, 0.05); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border-left: 4px solid #667eea;">
+                    <div style="display: grid; gap: 1rem; text-align: left;">
+                        <div>
+                            <label style="font-weight: 600; color: #666; font-size: 0.8rem; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Student Name</label>
+                            <p style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a;" id="summaryName">-</p>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #667eea; font-size: 0.8rem; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">📚 Subject for Exam</label>
+                            <p style="font-size: 1.2rem; font-weight: 700; color: #667eea;" id="summarySubject">-</p>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: #666; font-size: 0.8rem; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Exam Session</label>
+                            <p style="font-size: 1.1rem; font-weight: 600; color: #1a1a1a;" id="summarySession">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn" style="background: rgba(102, 126, 234, 0.1); color: #667eea;" id="backFromSummaryBtn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button type="button" class="modal-btn" id="confirmExamBtn">
+                    <i class="fas fa-check"></i>
+                    Confirm & Start
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Modal -->
+    <div id="resultModal" class="modal-overlay results-modal">
+        <div class="modal-content">
+            <div class="result-header">
+                <div class="result-icon success" id="resultIcon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="result-score" id="finalScore">0%</div>
+                <div class="result-subtitle" id="resultMessage">Exam completed successfully!</div>
+            </div>
+            <div class="result-details">
+                <div class="result-stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="correctAnswers">0</div>
+                        <div class="stat-label">Correct</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalQuestions">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="timeTaken">00:00</div>
+                        <div class="stat-label">Time</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn" id="finishBtn">
+                    <i class="fas fa-home"></i>
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{url_for('static', filename = '/js/bootstrap.bundle.min.js' )}}"></script>
+    <script>
+        // Template data from Flask - these are passed by the backend
+        const templateSubjects = {{ subjects|tojson }};
+        const templateSessions = {{ sessions|tojson }};
+        const urlSubjectId = {{ subject_id|default('null')|tojson }};
+        const urlSession = {{ session|default('null')|tojson }};
+        const loggedInStudentName = {{ student_name|default('')|tojson }};
+
+        // Global variables
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let answers = [];
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let studentName = '';
+        let studentClass = '';
+        let selectedSubject = '';
+        let selectedSession = '';
+
+        // DOM elements
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainContent = document.getElementById('mainContent');
+        const studentModal = document.getElementById('studentModal');
+        const resultModal = document.getElementById('resultModal');
+        const questionCard = document.getElementById('questionCard');
+        const questionText = document.getElementById('questionText');
+        const optionsGrid = document.getElementById('optionsGrid');
+        const currentQuestionDisplay = document.getElementById('currentQuestion');
+        const questionNumber = document.getElementById('questionNumber');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const timerDisplay = document.getElementById('timer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const flagBtn = document.getElementById('flagBtn');
+        const startExamBtn = document.getElementById('startExamBtn');
+        const finishBtn = document.getElementById('finishBtn');
+
+        console.log('=== DOM Elements Check ===');
+        console.log('mainContent:', mainContent);
+        console.log('questionText:', questionText);
+        console.log('optionsGrid:', optionsGrid);
+        console.log('currentQuestionDisplay:', currentQuestionDisplay);
+        console.log('questionNumber:', questionNumber);
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            populateSubjectDropdown();
+            populateSessionDropdown();
+            
+            // Add change listener to subject dropdown
+            const examSubjectDropdown = document.getElementById('examSubject');
+            if (examSubjectDropdown) {
+                examSubjectDropdown.addEventListener('change', function() {
+                    console.log('[DEBUG] Subject changed to:', this.value);
+                });
+            }
+            
+            showStudentModal();
+        });
+
+        // Populate subject dropdown from template data
+        function populateSubjectDropdown() {
+            const examSubjectDropdown = document.getElementById('examSubject');
+            if (!examSubjectDropdown) return;
+            
+            examSubjectDropdown.innerHTML = '<option value="">Select subject</option>';
+            
+            templateSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.subject_id;
+                option.textContent = subject.subject_name;
+                examSubjectDropdown.appendChild(option);
+            });
+
+            // Pre-select if subject_id is in URL
+            if (urlSubjectId) {
+                examSubjectDropdown.value = urlSubjectId;
+                console.log('[DEBUG] Pre-selected subject_id:', urlSubjectId);
+            }
+
+            console.log('[DEBUG] Populated subject dropdown with', templateSubjects.length, 'subjects');
+        }
+
+        // Populate session dropdown from template data
+        function populateSessionDropdown() {
+            const examSessionDropdown = document.getElementById('examSession');
+            if (!examSessionDropdown) return;
+            
+            examSessionDropdown.innerHTML = '<option value="">Select session</option>';
+            
+            templateSessions.forEach(session => {
+                const option = document.createElement('option');
+                option.value = session[0]; // session_id is first element
+                option.textContent = session[1]; // exam_session is second element
+                examSessionDropdown.appendChild(option);
+            });
+
+            console.log('[DEBUG] Populated session dropdown with', templateSessions.length, 'sessions');
+        }
+
+        // Show student info modal
+        function showStudentModal() {
+            // Use logged-in student name
+            document.getElementById('studentName').value = loggedInStudentName || '';
+
+            const examSubjectDropdown = document.getElementById('examSubject');
+            const examSessionDropdown = document.getElementById('examSession');
+            const subjectDropdownGroup = document.getElementById('subjectDropdownGroup');
+            const subjectDisplayGroup = document.getElementById('subjectDisplayGroup');
+            const subjectDisplayText = document.getElementById('subjectDisplayText');
+            const examSubjectHidden = document.getElementById('examSubjectHidden');
+
+            // If subject_id is from URL, hide dropdown and show as display
+            if (urlSubjectId) {
+                // Find and display the subject name
+                const selectedSubject = templateSubjects.find(s => s.subject_id == urlSubjectId);
+                if (selectedSubject) {
+                    subjectDisplayText.textContent = selectedSubject.subject_name;
+                    examSubjectHidden.value = urlSubjectId;
+                    
+                    // Hide dropdown, show display
+                    subjectDropdownGroup.style.display = 'none';
+                    subjectDisplayGroup.style.display = 'block';
+                    
+                    console.log('[DEBUG] Subject pre-selected:', selectedSubject.subject_name);
+                }
+            } else {
+                // Show dropdown for subject selection
+                subjectDropdownGroup.style.display = 'block';
+                subjectDisplayGroup.style.display = 'none';
+            }
+
+            studentModal.classList.add('show');
+        }
+
+        // Start exam
+        startExamBtn.addEventListener('click', async function() {
+            const name = document.getElementById('studentName').value.trim();
+            const examSubjectDropdown = document.getElementById('examSubject');
+            const examSessionDropdown = document.getElementById('examSession');
+            const examSubjectHidden = document.getElementById('examSubjectHidden');
+            
+            // Get subject value - either from dropdown or hidden field
+            let subjectVal = '';
+            if (urlSubjectId) {
+                // Subject is pre-selected via URL
+                subjectVal = examSubjectHidden.value;
+            } else {
+                // Subject is selected from dropdown
+                subjectVal = examSubjectDropdown ? examSubjectDropdown.value : '';
+            }
+            
+            const sessionVal = examSessionDropdown ? examSessionDropdown.value : '';
+
+            if (!name) {
+                alert('Student name not found. Please log in again.');
+                return;
+            }
+
+            if (!subjectVal) {
+                alert('Please select a subject');
+                return;
+            }
+
+            if (!sessionVal) {
+                alert('Please select a session');
+                return;
+            }
+
+            studentName = name;
+            studentClass = '';
+            selectedSubject = subjectVal;
+            selectedSession = sessionVal;
+            
+            // Get subject name from dropdown or template for API call
+            let subjectName = '';
+            if (urlSubjectId) {
+                const selectedSubject = templateSubjects.find(s => s.subject_id == urlSubjectId);
+                subjectName = selectedSubject ? selectedSubject.subject_name : '';
+            } else {
+                const selectedSubjectOption = examSubjectDropdown.options[examSubjectDropdown.selectedIndex];
+                subjectName = selectedSubjectOption ? selectedSubjectOption.text : '';
+            }
+
+            // Store in session storage for persistence
+            sessionStorage.setItem('studentName', studentName);
+            sessionStorage.setItem('selectedSubject', subjectName);
+            sessionStorage.setItem('selectedSubjectId', selectedSubject);
+            sessionStorage.setItem('selectedSession', selectedSession);
+
+            console.log('[DEBUG] Starting exam with:', {
+                name: studentName,
+                subjectId: selectedSubject,
+                subject: subjectName,
+                session: selectedSession
+            });
+
+            // Show summary modal instead of loading questions immediately
+            showSummaryModal();
+        });
+
+        // Show summary modal with student info
+        function showSummaryModal() {
+            const summaryModal = document.getElementById('summaryModal');
+            document.getElementById('summaryName').textContent = studentName;
+            
+            // Get subject display text from dropdown value
+            const examSubjectDropdown = document.getElementById('examSubject');
+            const selectedSubjectOption = examSubjectDropdown.options[examSubjectDropdown.selectedIndex];
+            const subjectDisplay = selectedSubjectOption ? selectedSubjectOption.text : selectedSubject;
+            document.getElementById('summarySubject').textContent = subjectDisplay;
+            
+            // Get session display text from dropdown value
+            const examSessionDropdown = document.getElementById('examSession');
+            const selectedSessionOption = examSessionDropdown.options[examSessionDropdown.selectedIndex];
+            const sessionDisplay = selectedSessionOption ? selectedSessionOption.text : selectedSession;
+            document.getElementById('summarySession').textContent = sessionDisplay;
+            
+            studentModal.classList.remove('show');
+            summaryModal.classList.add('show');
+        }
+
+        // Confirm exam - redirect to exam mode selection
+        const confirmExamBtn = document.getElementById('confirmExamBtn');
+        if (confirmExamBtn) {
+            confirmExamBtn.addEventListener('click', async function() {
+                const summaryModal = document.getElementById('summaryModal');
+                summaryModal.classList.remove('show');
+                
+                // Get session display name for storage
+                const examSessionDropdown = document.getElementById('examSession');
+                const selectedSessionOption = examSessionDropdown.options[examSessionDropdown.selectedIndex];
+                const sessionDisplay = selectedSessionOption ? selectedSessionOption.text : selectedSession;
+                
+                // Store session display name for use in other pages
+                sessionStorage.setItem('selectedSession_display', sessionDisplay);
+                
+                // Redirect to exam mode selection page
+                const subjectId = sessionStorage.getItem('selectedSubjectId');
+                const sessionId = sessionStorage.getItem('selectedSession');
+                window.location.href = `/exam-mode-selection?subject_id=${subjectId}&session=${sessionId}`;
+            });
+        }
+
+        // Back from summary - return to student modal
+        const backFromSummaryBtn = document.getElementById('backFromSummaryBtn');
+        if (backFromSummaryBtn) {
+            backFromSummaryBtn.addEventListener('click', function() {
+                const summaryModal = document.getElementById('summaryModal');
+                summaryModal.classList.remove('show');
+                studentModal.classList.add('show');
+            });
+        }
+
+        // Load questions
+        async function loadQuestions(subject, session) {
+            try {
+                console.log('=== Loading Questions ===');
+                console.log('Subject:', subject);
+                console.log('Session:', session);
+
+                // Build URL
+                let url = `/api/get-questions?subject=${encodeURIComponent(subject)}`;
+                if (session && session.trim()) {
+                    url += `&session=${encodeURIComponent(session)}`;
+                }
+                console.log('Fetch URL:', url);
+
+                // Create fetch with timeout
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeout);
+
+                const data = await response.json();
+                console.log('API Response Status:', response.status);
+                console.log('API Response Data:', data);
+
+                if (!response.ok) {
+                    const errorMsg = data.error || `Server error: ${response.status}`;
+                    console.error('API Error:', errorMsg);
+                    throw new Error(errorMsg);
+                }
+
+                questions = data.questions || [];
+                console.log('Total Questions Loaded:', questions.length);
+
+                if (questions.length === 0) {
+                    console.warn('No questions returned from API');
+                    alert('No questions found for this subject' + (session ? ' and session' : '') + '. ' +
+                          (data.available_subjects ? 'Available subjects: ' + data.available_subjects.join(', ') : ''));
+                    window.location.href = '/';
+                    return;
+                }
+
+                    // Validate question structure
+                console.log('First question structure:', questions[0]);
+
+                answers = new Array(questions.length).fill(null);
+
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                console.log('Main content displayed - loadingScreen:', loadingScreen, 'mainContent:', mainContent);
+
+                // Populate header with student info
+                const examSessionDropdown = document.getElementById('examSession');
+                const selectedOption = examSessionDropdown ? examSessionDropdown.options[examSessionDropdown.selectedIndex] : null;
+                const sessionDisplay = selectedOption ? selectedOption.text : session;
+                
+                document.getElementById('headerStudentName').textContent = studentName;
+                document.getElementById('headerSessionName').textContent = sessionDisplay;
+
+                // Start timer
+                startTimer();
+                console.log('Timer started');
+
+                // Display first question
+                console.log('Displaying first question...');
+                displayQuestion(0);
+                updateProgress();
+                console.log('=== Questions Loaded Successfully ===')
+                console.log('questionCard visibility:', questionCard ? questionCard.style.display : 'questionCard not found');
+            } catch (error) {
+                console.error('=== CRITICAL ERROR Loading Questions ===');
+                console.error('Error Name:', error.name);
+                console.error('Error Message:', error.message);
+                console.error('Full Error:', error);
+
+                // Hide loading screen
+                loadingScreen.style.display = 'none';
+
+                let errorMsg = 'Failed to load questions. ';
+                if (error.name === 'AbortError') {
+                    errorMsg += 'Loading timed out. Please check your internet connection.';
+                } else {
+                    errorMsg += error.message;
+                }
+
+                alert(errorMsg);
+                console.log('Redirecting to home...');
+                window.location.href = '/';
+            }
+        }
+
+        // Display question
+        function displayQuestion(index) {
+            try {
+                console.log('=== Displaying Question ===');
+                console.log('Question Index:', index);
+                console.log('Questions Array Length:', questions.length);
+
+                // keep track of current index globally so navigation works
+                currentQuestionIndex = index;
+
+                const question = questions[index];
+                if (!question) {
+                    console.error('Question not found at index:', index);
+                    return;
+                }
+
+                console.log('Current Question Object:', question);
+
+            // Validate question structure
+            if (!question.question_text) {
+                console.error('Question missing question_text:', question);
+                return;
+            }
+
+            if (!question.option_a || !question.option_b || !question.option_c || !question.option_d) {
+                console.error('Question missing options. Available properties:', Object.keys(question));
+                return;
+            }
+
+            console.log('Question Text:', question.question_text);
+            console.log('Options: A=', question.option_a, 'B=', question.option_b, 'C=', question.option_c, 'D=', question.option_d);
+
+            // Update question content
+            questionNumber.textContent = `Question ${index + 1}`;
+            currentQuestionDisplay.textContent = index + 1;
+            questionText.textContent = question.question_text;
+            console.log('Question content updated - questionNumber:', questionNumber, 'currentQuestionDisplay:', currentQuestionDisplay, 'questionText:', questionText);
+
+            // Clear previous options
+            optionsGrid.innerHTML = '';
+            console.log('Options grid cleared');
+
+            // Create option elements from question properties
+            const optionsArray = [question.option_a, question.option_b, question.option_c, question.option_d];
+            console.log('Options Array:', optionsArray);
+
+            optionsArray.forEach((option, optionIndex) => {
+                console.log('Creating option', optionIndex, ':', option);
+
+                const optionElement = document.createElement('div');
+                optionElement.className = 'option-item';
+                optionElement.dataset.index = optionIndex;
+
+                const letter = String.fromCharCode(65 + optionIndex); // A, B, C, D
+
+                optionElement.innerHTML = `
+                    <div class="option-letter">${letter}</div>
+                    <div class="option-text">${option}</div>
+                `;
+
+                // Add click handler
+                optionElement.addEventListener('click', () => selectOption(optionIndex));
+
+                // Highlight if already selected
+                if (answers[index] === optionIndex) {
+                    optionElement.classList.add('selected');
+                }
+
+                optionsGrid.appendChild(optionElement);
+            });
+
+            console.log('Options created and appended');
+
+            // Update navigation buttons
+            updateNavigationButtons();
+            console.log('Navigation buttons updated');
+
+            console.log('=== Question Displayed Successfully ===');
+            } catch (error) {
+                console.error('=== CRITICAL ERROR in displayQuestion ===');
+                console.error('Error:', error);
+                console.error('Stack:', error.stack);
+            }
+        }
+
+        // Select option
+        function selectOption(optionIndex) {
+            answers[currentQuestionIndex] = optionIndex;
+
+            // Update UI
+            const options = optionsGrid.querySelectorAll('.option-item');
+            options.forEach((option, index) => {
+                if (index === optionIndex) {
+                    option.classList.add('selected');
+                } else {
+                    option.classList.remove('selected');
+                }
+            });
+
+            // Auto-advance to next question after short delay
+            setTimeout(() => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    displayQuestion(currentQuestionIndex + 1);
+                    updateProgress();
+                }
+            }, 500);
+        }
+
+        // Update navigation buttons
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentQuestionIndex === 0;
+
+            // show submit button only on last question
+            if (currentQuestionIndex === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'inline-flex';
+            } else {
+                nextBtn.style.display = '';
+                submitBtn.style.display = 'none';
+            }
+
+            // disable next when it is visible and at end just in case
+            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
+        }
+
+        // Navigation handlers
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1);
+                updateProgress();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestionIndex === questions.length - 1) {
+                // Finish exam (shouldn't normally happen since button is hidden)
+                finishExam();
+            } else {
+                displayQuestion(currentQuestionIndex + 1);
+                updateProgress();
+            }
+        });
+
+        // submit button for finalising the exam
+        submitBtn.addEventListener('click', () => {
+            finishExam();
+        });
+
+        // Flag question
+        flagBtn.addEventListener('click', () => {
+            flagBtn.classList.toggle('flagged');
+            // You can implement flagging logic here
+        });
+
+        // Update progress
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressPercent.textContent = `${Math.round(progress)}%`;
+        }
+
+        // Timer functions
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Finish exam
+        function finishExam() {
+            clearInterval(timerInterval);
+            console.log('Finishing exam...');
+            console.log('Total questions:', questions.length);
+            console.log('Answers submitted:', answers);
+
+            // Calculate score and prepare answer details
+            let correct = 0;
+            const answerDetails = [];
+            
+            questions.forEach((question, index) => {
+                const userAnswer = answers[index];
+                const correctAnswer = question.correct_answer;
+                const isCorrect = userAnswer === correctAnswer;
+                
+                console.log(`Q${index + 1}: User=${userAnswer}, Correct=${correctAnswer}, Match=${isCorrect}`);
+                
+                if (isCorrect) {
+                    correct++;
+                }
+                
+                // Store answer details
+                answerDetails.push({
+                    question_id: index,
+                    answer: userAnswer || '',
+                    is_correct: isCorrect
+                });
+            });
+
+            const total = questions.length;
+            const percentage = Math.round((correct / total) * 100);
+            
+            console.log(`Final Score: ${correct}/${total} (${percentage}%)`);
+
+            // Submit to backend with answer details
+            submitExam(correct, total, percentage, answerDetails);
+        }
+
+        // Submit exam
+        async function submitExam(correct, total, percentage, answers) {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const subject = urlParams.get('subject');
+
+                const response = await fetch('/api/submit-exam', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        student_name: studentName,
+                        student_class: studentClass,
+                        subject: subject,
+                        session: selectedSession,
+                        score: correct,
+                        total_questions: total,
+                        percentage: percentage,
+                        answers: answers
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResults(correct, total, percentage);
+                } else {
+                    alert(data.error || 'Failed to submit exam');
+                }
+            } catch (error) {
+                console.error('Error submitting exam:', error);
+                alert('Failed to submit exam. Please try again.');
+            }
+        }
+
+        // Show results
+        function showResults(correct, total, percentage) {
+            document.getElementById('finalScore').textContent = `${percentage}%`;
+            document.getElementById('correctAnswers').textContent = correct;
+            document.getElementById('totalQuestions').textContent = total;
+            document.getElementById('timeTaken').textContent = timerDisplay.textContent;
+
+            // Update result icon and message
+            const resultIcon = document.getElementById('resultIcon');
+            const resultMessage = document.getElementById('resultMessage');
+
+            if (percentage >= 80) {
+                resultIcon.className = 'result-icon success';
+                resultIcon.innerHTML = '<i class="fas fa-trophy"></i>';
+                resultMessage.textContent = 'Excellent! Outstanding performance!';
+            } else if (percentage >= 60) {
+                resultIcon.className = 'result-icon success';
+                resultIcon.innerHTML = '<i class="fas fa-star"></i>';
+                resultMessage.textContent = 'Good job! Well done!';
+            } else {
+                resultIcon.className = 'result-icon warning';
+                resultIcon.innerHTML = '<i class="fas fa-redo"></i>';
+                resultMessage.textContent = 'Keep practicing! You can do better!';
+            }
+
+            resultModal.classList.add('show');
+        }
+
+        // Finish button
+        finishBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (mainContent.style.display === 'none') return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (!prevBtn.disabled) prevBtn.click();
+                    break;
+                case 'ArrowRight':
+                    if (!nextBtn.disabled) nextBtn.click();
+                    break;
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                    const optionIndex = parseInt(e.key) - 1;
+                    if (optionIndex < optionsGrid.children.length) {
+                        selectOption(optionIndex);
+                    }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
